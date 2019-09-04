@@ -1,7 +1,6 @@
 import { ScheduleController } from '../controllers/schedule'
 module.exports = (app: any) => {
     const url = `/api/schedule`
-    console.log(ScheduleController)
     app.route(url)
         .post(ScheduleController.create)
 

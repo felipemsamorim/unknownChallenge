@@ -34,7 +34,9 @@
     ]
   },
   "devDependencies": {
+    "jest": "^24.9.0",
     "nodemon": "^1.19.2",
+    "supertest": "^4.0.2",
     "ts-node": "^7.0.1"
   }
 }
