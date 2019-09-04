@@ -6,6 +6,7 @@ describe('Teste de rotas', () => {
     const res = await req(server).get("/api/schedule/available");
     expect(res.status).toEqual(200);
     expect(typeof res.body).toBe("object");
+    expect(res.body.status).not.toBe("fail");
   });
 
   //testa getAvaiableByRange()
@@ -17,6 +18,7 @@ describe('Teste de rotas', () => {
     const res = await req(server).post("/api/schedule/available").send(query);
     expect(res.status).toEqual(200);
     expect(typeof res.body).toBe("object");
+    expect(res.body.status).not.toBe("fail");
   });
 
   //testa create()
@@ -46,6 +48,7 @@ describe('Teste de rotas', () => {
     const res = await req(server).post("/api/schedule").send(exemplo1);
     expect(res.status).toEqual(200);
     expect(typeof res.body).toBe("object");
+    expect(res.body.status).not.toBe("fail");
   });
 
   //testa deleteByIndex()
@@ -54,5 +57,6 @@ describe('Teste de rotas', () => {
     const res = await req(server).delete(`/api/schedule/available/${index}`);
     expect(res.status).toEqual(200);
     expect(typeof res.body).toBe("object");
+    expect(res.body.status).not.toBe("fail");
   });
 })

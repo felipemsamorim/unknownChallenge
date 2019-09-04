@@ -125,7 +125,6 @@ export class Schedule {
         try {
             callback(arr.filter((e: any): any => {
                 let dt = Schedule.convertDateString(e.day)
-                console.log(dt)
                 return (dt >= obj.dtIni && dt <= obj.dtEnd)
             }))
         } catch (error) {
