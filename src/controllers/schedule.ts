@@ -31,14 +31,14 @@ export const ScheduleController = {
         });
 
     },
-           
-            deleteByIndex: (req: { params: any; }, res: any) => {
-                Schedule.deleteOne(req.params.index, (r) => {
-                    if (r.status == 'fail') {
-                        res.status(500).json(r)
-                    } else {
-                        res.status(200).json(r)
-                    }
-                });
+
+    deleteByIndex: (req: { params: any; }, res: any) => {
+        Schedule.deleteOne(req.params.index, (r) => {
+            if (r.status == 'fail') {
+                res.status(500).json(r)
+            } else {
+                res.status(200).json(r)
             }
+        });
+    }
 }

@@ -4,6 +4,8 @@ import fs from 'fs'
 import path from 'path'
 export class Schedule {
 
+    public readonly PATH = path.join(__dirname, '../../content_files')
+        + '/available.json'
 
     private _name!: String
     get name(): String { return this._name }
@@ -36,19 +38,35 @@ export class Schedule {
     }
     saveFile = (callback: { (data: any): void }): void => {
         try {
-            fs.writeFile(path.join(__dirname, '../../content_files')
-                + '/' + (this.name || Date.now()) + '.json', JSON.stringify(this), () =>
-                    callback(`${this.name || Date.now()}.json save sucessfully`)
-            )
+            fs.readFile(this.PATH, (err, data) => {
+                let r = JSON.parse(data.toString())
+                r.push(this)
+                if (err) {
+                    callback(err)
+                } else {
+                    fs.unlink(this.PATH, () => {
+                        fs.writeFile(this.PATH, JSON.stringify(r), () =>
+                            callback(r)
+                        )
+                    })
+
+                }
+            })
         } catch (error) {
             callback({ error, status: 'fail' })
         }
     }
     public static getAvaiable = (callback: { (data: any): void }): void => {
+        const PATH = path.join(__dirname, '../../content_files')
+            + '/available.json'
         try {
-            let r = JSON.parse(fs.readFileSync(path.join(__dirname, '../../content_files')
-                + '/available.json').toString())
-            callback(r)
+            fs.readFile(PATH, (err, data) => {
+                if (err) {
+                    callback(err)
+                } else {
+                    callback(JSON.parse(data.toString()))
+                }
+            })
         } catch (error) {
             callback({ error, status: 'fail' })
         }
@@ -56,14 +74,22 @@ export class Schedule {
 
     public static deleteOne = (index: number, callback: { (data: any): void }): void => {
         try {
-            let r = JSON.parse(fs.readFileSync(path.join(__dirname, '../../content_files')
-                + '/available.json').toString())
-            r.splice(index, 1)
-            fs.unlink(path.join(__dirname, '../../content_files') + '/available.json', () => {
-                fs.writeFile(path.join(__dirname, '../../content_files')
-                    + '/available.json', JSON.stringify(r), () =>
-                        callback(r)
-                )
+            const PATH = path.join(__dirname, '../../content_files')
+                + '/available.json'
+
+            fs.readFile(PATH, (err, data) => {
+                let r = JSON.parse(data.toString())
+                r.splice(index, 1)
+                if (err) {
+                    callback(err)
+                } else {
+                    fs.unlink(PATH, () => {
+                        fs.writeFile(PATH, JSON.stringify(r), () =>
+                            callback(r)
+                        )
+                    })
+
+                }
             })
         } catch (error) {
             callback({ error, status: 'fail' })
@@ -72,14 +98,11 @@ export class Schedule {
 
     public static getAvaiableByRange = (obj: any, callback: { (data: any): void }): void => {
         try {
-            console.log(obj)
             let r = JSON.parse(fs.readFileSync(path.join(__dirname, '../../content_files')
                 + '/available.json').toString())
-            console.log(r)
-            let dtIniF = Schedule.convertDateString(obj.dtIni)
-            let dtEndF = Schedule.convertDateString(obj.dtEnd)
-            console.log(dtIniF)
-            console.log(dtEndF)
+            obj.dtIni = Schedule.convertDateString(obj.dtIni)
+            obj.dtEnd = Schedule.convertDateString(obj.dtEnd)
+            console.log(obj)
             Schedule.dateRangeSync(r, obj, (r) => {
                 callback(r)
             })
@@ -101,9 +124,9 @@ export class Schedule {
     static dateRangeSync(arr: Array<any>, obj: any, callback: { (data: any): void }) {
         try {
             callback(arr.filter((e: any): any => {
-                Schedule.convertDateString(e.day) <= Schedule.convertDateString(obj.dtIni)
-                    &&
-                    Schedule.convertDateString(e.day) >= Schedule.convertDateString(obj.dtEnd)
+                let dt = Schedule.convertDateString(e.day)
+                console.log(dt)
+                return (dt >= obj.dtIni && dt <= obj.dtEnd)
             }))
         } catch (error) {
             throw new Error(error);
