@@ -40,17 +40,47 @@ export class Schedule {
         try {
             fs.readFile(this.PATH, (err, data) => {
                 let r = JSON.parse(data.toString())
-                r.push(this)
-                if (err) {
-                    callback(err)
-                } else {
-                    fs.unlink(this.PATH, () => {
-                        fs.writeFile(this.PATH, JSON.stringify(r), () =>
-                            callback(r)
-                        )
+                let conflicts = []
+                r.map((av_it: { start: String; end: String; }) => {
+                    this.intervals.map(obj_it => {
+                        if (obj_it.start == av_it.start || obj_it.end == av_it.end ||
+                            obj_it.end == av_it.start || obj_it.start == av_it.end)
+                            conflicts.push(av_it)
                     })
+                })
+                if (conflicts.length > 0) {
+                    r.push(this)
+                    if (err) {
+                        callback(err)
+                    } else {
+                        fs.unlink(this.PATH, () => {
+                            let obj: any
+                            switch (this.typeSchedule) {
+                                case TypeSchedule.Day:
+                                    obj = {
+                                        day: r.dateIni,
+                                        intervals: this.intervals
+                                    }
+                                    break;
+                                default: {
+                                    delete r.PATH
+                                    obj = r
+                                    break;
+                                }
+                            }
+                            fs.writeFile(this.PATH, JSON.stringify(obj), () =>
+                                callback(r)
+                            )
+                        })
 
+                    }
+                } else {
+                    callback({
+                        reason: 'date conflict',
+                        status: 'fail'
+                    })
                 }
+
             })
         } catch (error) {
             callback({ error, status: 'fail' })
